@@ -1,0 +1,63 @@
+{
+  "userName": "ChaosspielerX",
+  "kontoNr": "CC-000241",
+  "standText": "11.03.2026 22:15 Uhr",
+  "kontostand": 1245,
+  "rang": 7,
+  "erhalten": 680,
+  "gespendet": 140,
+  "ausgegeben": 215,
+  "nichtPool": 1090,
+  "chaostopfAnteil": 155,
+  "poolEingezahlt": 55,
+  "shopAusgegeben": 95,
+  "bonusErhalten": 80,
+  "eventGewinne": 120,
+  "buchungen": [
+    {
+      "datum": "11.03.2026 21:50",
+      "titel": "Bonus erhalten",
+      "typ": "plus",
+      "betrag": 50,
+      "quelle": "Belohnung",
+      "saldoNachher": 1245,
+      "text": "Tagesbonus erfolgreich gutgeschrieben."
+    },
+    {
+      "datum": "11.03.2026 21:30",
+      "titel": "Shop Kauf",
+      "typ": "minus",
+      "betrag": -25,
+      "quelle": "Shop",
+      "saldoNachher": 1195,
+      "text": "Item aus dem ChaosCoins Shop gekauft."
+    },
+    {
+      "datum": "11.03.2026 21:05",
+      "titel": "Geschenk von Max",
+      "typ": "plus",
+      "betrag": 20,
+      "quelle": "!gib",
+      "saldoNachher": 1220,
+      "text": "Coins von einem anderen User erhalten."
+    },
+    {
+      "datum": "11.03.2026 20:40",
+      "titel": "Pool Einzahlung",
+      "typ": "minus",
+      "betrag": -10,
+      "quelle": "Chaostopf",
+      "saldoNachher": 1200,
+      "text": "Einzahlung in den Community Pool."
+    },
+    {
+      "datum": "11.03.2026 20:05",
+      "titel": "Event Gewinn",
+      "typ": "plus",
+      "betrag": 40,
+      "quelle": "Event",
+      "saldoNachher": 1210,
+      "text": "Gewinn aus einem aktiven ChaosCoins Event."
+    }
+  ]
+}

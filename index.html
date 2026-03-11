@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>ChaosCoins - Kontoauszug Mobile</title>
+  <style>
+    :root {
+      --bg: #08111f;
+      --bg2: #0d1b30;
+      --card: rgba(15, 29, 52, 0.92);
+      --line: rgba(110, 200, 255, 0.18);
+      --glow: rgba(80, 150, 255, 0.95);
+      --glow-soft: rgba(110, 200, 255, 0.75);
+      --text: #f5fbff;
+      --muted: #95aeca;
+      --good: #6cffb2;
+      --bad: #ff8f8f;
+      --warn: #ffd972;
+      --shadow: 0 12px 30px rgba(0,0,0,0.35);
+      --radius: 20px;
+      --gap: 14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background:
+        radial-gradient(circle at top right, rgba(80,150,255,0.18), transparent 28%),
+        radial-gradient(circle at top left, rgba(110,200,255,0.10), transparent 22%),
+        linear-gradient(180deg, var(--bg) 0%, #050b14 100%);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      min-height: 100%;
+    }
+
+    body {
+      padding: 16px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 720px;
+      margin: 0 auto;
+      display: grid;
+      gap: var(--gap);
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+      overflow: hidden;
+    }
+
+    .hero {
+      position: relative;
+      padding: 18px;
+      background:
+        linear-gradient(180deg, rgba(80,150,255,0.14), rgba(15,29,52,0.82)),
+        linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border: 1px solid rgba(110,200,255,0.12);
+      border-radius: var(--radius);
+    }
+
+    .eyebrow {
+      color: var(--glow-soft);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .user-name {
+      font-size: clamp(26px, 6vw, 40px);
+      font-weight: 800;
+      line-height: 1.05;
+      margin: 0 0 8px 0;
+      word-break: break-word;
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .pill {
+      border: 1px solid rgba(110,200,255,0.18);
+      background: rgba(255,255,255,0.03);
+      color: var(--muted);
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+    }
+
+    .balance-box {
+      background: rgba(5, 13, 24, 0.55);
+      border: 1px solid rgba(110,200,255,0.16);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .label {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .balance {
+      font-size: clamp(30px, 9vw, 52px);
+      line-height: 1;
+      font-weight: 900;
+      color: white;
+      text-shadow: 0 0 18px rgba(80,150,255,0.22);
+    }
+
+    .balance-sub {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .section-head {
+      padding: 16px 16px 0 16px;
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .section-sub {
+      margin: 6px 0 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .stats-grid {
+      padding: 16px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .stat {
+      background: rgba(5, 13, 24, 0.52);
+      border: 1px solid rgba(110,200,255,0.14);
+      border-radius: 16px;
+      padding: 14px;
+      min-height: 92px;
+    }
+
+    .stat .value {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      word-break: break-word;
+    }
+
+    .stat .name {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .list-wrap {
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .booking {
+      background: rgba(5, 13, 24, 0.56);
+      border: 1px solid rgba(110,200,255,0.13);
+      border-radius: 16px;
+      padding: 14px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .booking-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .booking-title {
+      font-weight: 800;
+      font-size: 16px;
+      line-height: 1.25;
+    }
+
+    .booking-date {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .amount {
+      font-size: 24px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .plus { color: var(--good); }
+    .minus { color: var(--bad); }
+    .neutral { color: var(--warn); }
+
+    .booking-info {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .booking-note {
+      color: #dce9f7;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .empty {
+      padding: 18px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .footer-note {
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      padding: 4px 8px 16px 8px;
+      line-height: 1.5;
+    }
+
+    @media (min-width: 700px) {
+      body { padding: 22px; }
+      .hero { padding: 22px; }
+      .stats-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="card hero">
+      <div class="eyebrow">ChaosCoins - Mobile Kontoauszug</div>
+      <h1 class="user-name" id="userName">Lade Daten ...</h1>
+      <div class="meta-row">
+        <div class="pill" id="kontoNr">Konto-Nr.: -</div>
+        <div class="pill" id="rang">Rang: -</div>
+        <div class="pill" id="standText">Stand: -</div>
+      </div>
+      <div class="balance-box">
+        <div class="label">Kontostand</div>
+        <div class="balance" id="kontostand">0</div>
+        <div class="balance-sub" id="kontostandText">0 ChaosCoins</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2 class="section-title">Konto - Schnellansicht</h2>
+        <p class="section-sub">Hier stehen nur Bankdaten und Coin-Bewegungen. Keine Spiel-Statuswerte.</p>
+      </div>
+      <div class="stats-grid" id="statsGrid"></div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2 class="section-title">Letzte Buchungen</h2>
+        <p class="section-sub">Mobile Ansicht als Karten. So kann man alles auf dem Handy gut lesen.</p>
+      </div>
+      <div class="list-wrap" id="buchungenList"></div>
+    </section>
+
+    <div class="footer-note">
+      ChaosCoins Kontoauszug - mobile first - geeignet fuer Handy, Tablet und PC.
+    </div>
+  </main>
+
+  <script>
+    const JSON_PATH = "./kontoauszug_mobile.json";
+
+    function formatNumber(value) {
+      const num = Number(value || 0);
+      return new Intl.NumberFormat('de-DE').format(num);
+    }
+
+    function setText(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value ?? "-";
+    }
+
+    function createStatCard(label, value) {
+      const div = document.createElement('div');
+      div.className = 'stat';
+      div.innerHTML = `
+        <div class="value">${value}</div>
+        <div class="name">${label}</div>
+      `;
+      return div;
+    }
+
+    function amountClass(type, amount) {
+      if (type === 'plus' || Number(amount) > 0) return 'plus';
+      if (type === 'minus' || Number(amount) < 0) return 'minus';
+      return 'neutral';
+    }
+
+    function formatAmount(amount) {
+      const num = Number(amount || 0);
+      const sign = num > 0 ? '+' : num < 0 ? '-' : '';
+      return `${sign}${formatNumber(Math.abs(num))}`;
+    }
+
+    function renderStats(data) {
+      const grid = document.getElementById('statsGrid');
+      grid.innerHTML = '';
+
+      const items = [
+        ['Erhalten', formatNumber(data.erhalten)],
+        ['Gespendet', formatNumber(data.gespendet)],
+        ['Ausgegeben', formatNumber(data.ausgegeben)],
+        ['Nicht-Pool', formatNumber(data.nichtPool)],
+        ['Chaostopf Anteil', formatNumber(data.chaostopfAnteil)],
+        ['Pool eingezahlt', formatNumber(data.poolEingezahlt)],
+        ['Shop ausgegeben', formatNumber(data.shopAusgegeben)],
+        ['Bonus erhalten', formatNumber(data.bonusErhalten)],
+        ['Event-Gewinne', formatNumber(data.eventGewinne)]
+      ];
+
+      items.forEach(([label, value]) => grid.appendChild(createStatCard(label, value)));
+    }
+
+    function renderBookings(bookings) {
+      const list = document.getElementById('buchungenList');
+      list.innerHTML = '';
+
+      if (!Array.isArray(bookings) || bookings.length === 0) {
+        list.innerHTML = '<div class="empty">Keine Buchungen vorhanden.</div>';
+        return;
+      }
+
+      bookings.forEach(item => {
+        const card = document.createElement('article');
+        const cls = amountClass(item.typ, item.betrag);
+        const sourceText = item.quelle ? `Quelle: ${item.quelle}` : '';
+        const standText = item.saldoNachher !== undefined ? `Stand danach: ${formatNumber(item.saldoNachher)}` : '';
+
+        card.className = 'booking';
+        card.innerHTML = `
+          <div class="booking-top">
+            <div>
+              <div class="booking-title">${item.titel || 'Buchung'}</div>
+              <div class="booking-date">${item.datum || '-'}</div>
+            </div>
+            <div class="amount ${cls}">${formatAmount(item.betrag)}</div>
+          </div>
+          <div class="booking-info">
+            ${sourceText ? `<span>${sourceText}</span>` : ''}
+            ${standText ? `<span>${standText}</span>` : ''}
+          </div>
+          ${item.text ? `<div class="booking-note">${item.text}</div>` : ''}
+        `;
+        list.appendChild(card);
+      });
+    }
+
+    async function loadData() {
+      try {
+        const response = await fetch(JSON_PATH + '?v=' + Date.now(), { cache: 'no-store' });
+        if (!response.ok) throw new Error('JSON konnte nicht geladen werden');
+        const data = await response.json();
+
+        setText('userName', data.userName || '-');
+        setText('kontoNr', `Konto-Nr.: ${data.kontoNr || '-'}`);
+        setText('rang', `Rang: ${data.rang || '-'}`);
+        setText('standText', `Stand: ${data.standText || '-'}`);
+        setText('kontostand', formatNumber(data.kontostand || 0));
+        setText('kontostandText', `${formatNumber(data.kontostand || 0)} ChaosCoins`);
+
+        renderStats(data);
+        renderBookings(data.buchungen || []);
+      } catch (error) {
+        setText('userName', 'Fehler beim Laden');
+        setText('kontostandText', 'Bitte JSON-Pfad pruefen');
+        document.getElementById('statsGrid').innerHTML = '<div class="empty">Die JSON-Datei wurde nicht gefunden oder konnte nicht geladen werden.</div>';
+        document.getElementById('buchungenList').innerHTML = '<div class="empty">Bitte Pfad und Dateinamen pruefen.</div>';
+        console.error(error);
+      }
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
