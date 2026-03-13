@@ -306,7 +306,110 @@
   </main>
 
   <script>
-    const JSON_PATH = "./kontoauszug_mobile.json";
+    /*
+    ============================================================================
+    [A] EINSTELLBEREICH - HIER DARFST DU AENDERN
+    ============================================================================
+    */
+
+    // HIER DARFST DU AENDERN:
+    // Fallback JSON, wenn kein ?user=... in der URL steht
+    const DEFAULT_JSON_PATH = "./kontoauszug_mobile.json";
+
+    // HIER DARFST DU AENDERN:
+    // Ordner fuer User-JSON Dateien
+    const USERDATEN_ORDNER = "./Userdaten/";
+
+    // HIER DARFST DU AENDERN:
+    // Dateiendung fuer Userdateien
+    const USERDATEI_ENDUNG = ".json";
+
+    // HIER DARFST DU AENDERN:
+    // Fallback Ungueltig-Seite, wenn invalid=... nicht in der URL steht
+    const DEFAULT_INVALID_PAGE = "./ungueltig.html";
+
+    // HIER DARFST DU AENDERN:
+    // Auto-Refresh in Millisekunden
+    const AUTO_REFRESH_MS = 10000;
+
+    /*
+    ============================================================================
+    [B] BASIS / URL HELFER - NICHT AENDERN
+    ============================================================================
+    */
+
+    function getUrlParams() {
+      const params = new URLSearchParams(window.location.search);
+      return {
+        user: params.get("user"),
+        expires: params.get("expires"),
+        invalid: params.get("invalid")
+      };
+    }
+
+    function getJsonPathFromUrl() {
+      const urlData = getUrlParams();
+
+      if (urlData.user && urlData.user.trim() !== "") {
+        return USERDATEN_ORDNER + urlData.user.trim().toLowerCase() + USERDATEI_ENDUNG;
+      }
+
+      return DEFAULT_JSON_PATH;
+    }
+
+    function getInvalidUrlFromParams() {
+      const urlData = getUrlParams();
+
+      if (urlData.invalid && urlData.invalid.trim() !== "") {
+        return urlData.invalid.trim();
+      }
+
+      return DEFAULT_INVALID_PAGE;
+    }
+
+    function getUnixNow() {
+      return Math.floor(Date.now() / 1000);
+    }
+
+    /*
+    ============================================================================
+    [C] ZEITLIMIT PRUEFEN - WICHTIG
+    ============================================================================
+    */
+
+    function checkLinkValidity() {
+      const urlData = getUrlParams();
+
+      // MERKE:
+      // Wenn KEIN expires in der URL ist, wird NICHT blockiert.
+      // Dann darf die Seite normal laden.
+      if (!urlData.expires || urlData.expires.trim() === "") {
+        return true;
+      }
+
+      const expiresUnix = Number(urlData.expires);
+      const nowUnix = getUnixNow();
+
+      // Falls expires kaputt / keine Zahl ist -> ungueltig
+      if (!Number.isFinite(expiresUnix)) {
+        window.location.href = getInvalidUrlFromParams();
+        return false;
+      }
+
+      // Wenn Zeit abgelaufen ist -> weiter zu ungueltig.html
+      if (nowUnix > expiresUnix) {
+        window.location.href = getInvalidUrlFromParams();
+        return false;
+      }
+
+      return true;
+    }
+
+    /*
+    ============================================================================
+    [D] FORMAT / ANZEIGE HELFER
+    ============================================================================
+    */
 
     function formatNumber(value) {
       const num = Number(value || 0);
@@ -339,6 +442,12 @@
       const sign = num > 0 ? '+' : num < 0 ? '-' : '';
       return `${sign}${formatNumber(Math.abs(num))}`;
     }
+
+    /*
+    ============================================================================
+    [E] STATS / BUCHUNGEN RENDERN
+    ============================================================================
+    */
 
     function renderStats(data) {
       const grid = document.getElementById('statsGrid');
@@ -393,11 +502,43 @@
       });
     }
 
+    /*
+    ============================================================================
+    [F] DATEN LADEN
+    ============================================================================
+    */
+
     async function loadData() {
       try {
-        const response = await fetch(JSON_PATH + '?v=' + Date.now(), { cache: 'no-store' });
-        if (!response.ok) throw new Error('JSON konnte nicht geladen werden');
+        // WICHTIG:
+        // Erst ZEITLIMIT pruefen
+        // Wenn abgelaufen, wird hier direkt zu ungueltig.html weitergeleitet
+        if (!checkLinkValidity()) {
+          return;
+        }
+
+        const jsonPath = getJsonPathFromUrl();
+        const response = await fetch(jsonPath + '?v=' + Date.now(), { cache: 'no-store' });
+
+        if (!response.ok) {
+          throw new Error('JSON konnte nicht geladen werden: ' + jsonPath);
+        }
+
         const data = await response.json();
+
+        // EXTRA SICHERHEIT:
+        // Falls URL kein expires hatte, aber JSON schon Ablaufdaten enthaelt,
+        // kann optional auch die JSON selbst geprueft werden.
+        if (data.linkAblaufUnix !== undefined && data.linkAblaufUnix !== null) {
+          const nowUnix = getUnixNow();
+          const jsonExpires = Number(data.linkAblaufUnix);
+
+          if (Number.isFinite(jsonExpires) && nowUnix > jsonExpires) {
+            const invalidFromJson = data.ungueltigHtml || getInvalidUrlFromParams();
+            window.location.href = invalidFromJson;
+            return;
+          }
+        }
 
         setText('userName', data.userName || '-');
         setText('kontoNr', `Konto-Nr.: ${data.kontoNr || '-'}`);
@@ -412,13 +553,19 @@
         setText('userName', 'Fehler beim Laden');
         setText('kontostandText', 'Bitte JSON-Pfad pruefen');
         document.getElementById('statsGrid').innerHTML = '<div class="empty">Die JSON-Datei wurde nicht gefunden oder konnte nicht geladen werden.</div>';
-        document.getElementById('buchungenList').innerHTML = '<div class="empty">Bitte Pfad und Dateinamen pruefen.</div>';
+        document.getElementById('buchungenList').innerHTML = '<div class="empty">Bitte Pfad, Dateinamen oder Link pruefen.</div>';
         console.error(error);
       }
     }
 
+    /*
+    ============================================================================
+    [G] START
+    ============================================================================
+    */
+
     loadData();
-    setInterval(loadData, 10000);
+    setInterval(loadData, AUTO_REFRESH_MS);
   </script>
 </body>
 </html>
