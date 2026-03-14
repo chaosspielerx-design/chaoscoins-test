@@ -188,62 +188,30 @@
       line-height: 1.35;
     }
 
-    .list-wrap {
-      padding: 14px;
+    .status-box {
+      padding: 16px;
       display: grid;
-      gap: 10px;
+      gap: 12px;
     }
 
-    .booking {
-      background: rgba(5, 13, 24, 0.56);
-      border: 1px solid rgba(110,200,255,0.13);
+    .status-line {
+      background: rgba(5, 13, 24, 0.52);
+      border: 1px solid rgba(110,200,255,0.14);
       border-radius: 16px;
       padding: 14px;
-      display: grid;
-      gap: 8px;
     }
 
-    .booking-top {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .booking-title {
-      font-weight: 800;
-      font-size: 16px;
-      line-height: 1.25;
-    }
-
-    .booking-date {
-      color: var(--muted);
-      font-size: 12px;
-      white-space: nowrap;
-    }
-
-    .amount {
-      font-size: 24px;
-      font-weight: 900;
-      line-height: 1;
-    }
-
-    .plus { color: var(--good); }
-    .minus { color: var(--bad); }
-    .neutral { color: var(--warn); }
-
-    .booking-info {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px 12px;
+    .status-title {
       color: var(--muted);
       font-size: 13px;
+      margin-bottom: 6px;
     }
 
-    .booking-note {
-      color: #dce9f7;
-      font-size: 14px;
-      line-height: 1.45;
+    .status-value {
+      font-size: 18px;
+      font-weight: 800;
+      line-height: 1.35;
+      word-break: break-word;
     }
 
     .empty {
@@ -273,11 +241,13 @@
     <section class="card hero">
       <div class="eyebrow">ChaosCoins - Mobile Kontoauszug</div>
       <h1 class="user-name" id="userName">Lade Daten ...</h1>
+
       <div class="meta-row">
         <div class="pill" id="kontoNr">Konto-Nr.: -</div>
-        <div class="pill" id="rang">Rang: -</div>
+        <div class="pill" id="rangText">Rang: -</div>
         <div class="pill" id="standText">Stand: -</div>
       </div>
+
       <div class="balance-box">
         <div class="label">Kontostand</div>
         <div class="balance" id="kontostand">0</div>
@@ -288,17 +258,50 @@
     <section class="card">
       <div class="section-head">
         <h2 class="section-title">Konto - Schnellansicht</h2>
-        <p class="section-sub">Hier stehen nur Bankdaten und Coin-Bewegungen. Keine Spiel-Statuswerte.</p>
+        <p class="section-sub">Hier stehen nur Kontodaten und die wichtigsten Bewegungen.</p>
       </div>
       <div class="stats-grid" id="statsGrid"></div>
     </section>
 
     <section class="card">
       <div class="section-head">
-        <h2 class="section-title">Letzte Buchungen</h2>
-        <p class="section-sub">Mobile Ansicht als Karten. So kann man alles auf dem Handy gut lesen.</p>
+        <h2 class="section-title">Chaostopf</h2>
+        <p class="section-sub">Hier siehst du den aktuellen Stand und deinen eigenen Beitrag.</p>
       </div>
-      <div class="list-wrap" id="buchungenList"></div>
+      <div class="status-box">
+        <div class="status-line">
+          <div class="status-title">Status</div>
+          <div class="status-value" id="chaostopfStatus">-</div>
+        </div>
+
+        <div class="status-line">
+          <div class="status-title">Aktueller Stand</div>
+          <div class="status-value" id="chaostopfStandText">-</div>
+        </div>
+
+        <div class="status-line">
+          <div class="status-title">Dein Beitrag</div>
+          <div class="status-value" id="chaostopfEigenerBeitrag">-</div>
+        </div>
+
+        <div class="status-line">
+          <div class="status-title">Aktion</div>
+          <div class="status-value" id="chaostopfAktionText">-</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2 class="section-title">System-Info</h2>
+        <p class="section-sub">Das zeigt den Zeitpunkt der letzten erzeugten Datei.</p>
+      </div>
+      <div class="status-box">
+        <div class="status-line">
+          <div class="status-title">Erstellt am</div>
+          <div class="status-value" id="erstelltAm">-</div>
+        </div>
+      </div>
     </section>
 
     <div class="footer-note">
@@ -308,42 +311,26 @@
 
   <script>
     /*
-    ============================================================================
+    ===============================================================================
     CHAOSSPIELER X - HTML OVERLAY
     © 2026 Björn / Chaosspieler X / Chaosstudio X
 
-    MODUL: KONTOAUSZUG - TOKEN INDEX
-    ============================================================================
+    MODUL: KONTOAUSZUG MOBILE - EINFACHE JSON VERSION
+    ===============================================================================
     */
 
     /*
-    ============================================================================
+    ===============================================================================
     [A] EINSTELLBEREICH - HIER DARFST DU AENDERN
-    ============================================================================
+    ===============================================================================
     */
 
     // HIER DARFST DU AENDERN:
-    // Ordner fuer Token-Dateien
-    const TOKEN_ORDNER = "./token/";
+    // Diese HTML liest direkt diese JSON-Datei.
+    const JSON_PFAD = "./kontoauszug_mobile.json";
 
     // HIER DARFST DU AENDERN:
-    // Dateiendung fuer Token-Dateien
-    const TOKEN_DATEI_ENDUNG = ".json";
-
-    // HIER DARFST DU AENDERN:
-    // Status-Datei fuer offen / geschlossen
-    const STATUS_JSON_PFAD = "./status.json";
-
-    // HIER DARFST DU AENDERN:
-    // Fallback Seite fuer ungueltig
-    const DEFAULT_UNGUELTIG_PAGE = "./ungueltig.html";
-
-    // HIER DARFST DU AENDERN:
-    // Fallback Seite fuer ausser Betrieb
-    const DEFAULT_AUSSERBETRIEB_PAGE = "./ausserbetrieb.html";
-
-    // HIER DARFST DU AENDERN:
-    // Auto Refresh
+    // Auto-Refresh in Millisekunden
     const AUTO_REFRESH_MS = 10000;
 
     // HIER DARFST DU AENDERN:
@@ -351,95 +338,35 @@
     const DEBUG_AKTIV = true;
 
     /*
-    ============================================================================
-    [B] BASIS / URL HELFER - NICHT AENDERN
-    ============================================================================
+    ===============================================================================
+    [B] BASIS / HELFER - NICHT AENDERN
+    ===============================================================================
     */
 
     function dbg(text, data) {
       if (!DEBUG_AKTIV) return;
       if (data !== undefined) {
-        console.log("[CC TOKEN INDEX]", text, data);
+        console.log("[KONTOAUSZUG MOBILE]", text, data);
       } else {
-        console.log("[CC TOKEN INDEX]", text);
+        console.log("[KONTOAUSZUG MOBILE]", text);
       }
     }
-
-    function getUrlParams() {
-      const params = new URLSearchParams(window.location.search);
-      return {
-        token: (params.get("token") || "").trim(),
-        invalid: (params.get("invalid") || "").trim(),
-        closed: (params.get("closed") || "").trim()
-      };
-    }
-
-    function getToken() {
-      const urlData = getUrlParams();
-      return urlData.token;
-    }
-
-    function getTokenJsonPath() {
-      const token = getToken();
-      if (!token) return "";
-      return TOKEN_ORDNER + token + TOKEN_DATEI_ENDUNG;
-    }
-
-    function getInvalidUrlFromParamsOrData(data) {
-      const urlData = getUrlParams();
-
-      if (urlData.invalid) {
-        return urlData.invalid;
-      }
-
-      if (data && data.ungueltigHtml) {
-        return data.ungueltigHtml;
-      }
-
-      return DEFAULT_UNGUELTIG_PAGE;
-    }
-
-    function getClosedUrlFromParamsOrData(data) {
-      const urlData = getUrlParams();
-
-      if (urlData.closed) {
-        return urlData.closed;
-      }
-
-      if (data && data.ausserbetriebHtml) {
-        return data.ausserbetriebHtml;
-      }
-
-      return DEFAULT_AUSSERBETRIEB_PAGE;
-    }
-
-    function getUnixNow() {
-      return Math.floor(Date.now() / 1000);
-    }
-
-    function goTo(url) {
-      window.location.href = url;
-    }
-
-    /*
-    ============================================================================
-    [C] FORMAT / ANZEIGE HELFER
-    ============================================================================
-    */
 
     function formatNumber(value) {
       const num = Number(value || 0);
-      return new Intl.NumberFormat('de-DE').format(num);
+      return new Intl.NumberFormat("de-DE").format(num);
     }
 
     function setText(id, value) {
       const el = document.getElementById(id);
-      if (el) el.textContent = value ?? "-";
+      if (el) {
+        el.textContent = value ?? "-";
+      }
     }
 
     function createStatCard(label, value) {
-      const div = document.createElement('div');
-      div.className = 'stat';
+      const div = document.createElement("div");
+      div.className = "stat";
       div.innerHTML = `
         <div class="value">${value}</div>
         <div class="name">${label}</div>
@@ -447,247 +374,116 @@
       return div;
     }
 
-    function amountClass(type, amount) {
-      if (type === 'plus' || Number(amount) > 0) return 'plus';
-      if (type === 'minus' || Number(amount) < 0) return 'minus';
-      return 'neutral';
-    }
-
-    function formatAmount(amount) {
-      const num = Number(amount || 0);
-      const sign = num > 0 ? '+' : num < 0 ? '-' : '';
-      return `${sign}${formatNumber(Math.abs(num))}`;
-    }
-
     /*
-    ============================================================================
-    [D] STATUS PRUEFEN - OFFEN / GESCHLOSSEN
-    ============================================================================
+    ===============================================================================
+    [C] JSON LADEN - NICHT AENDERN
+    ===============================================================================
     */
 
-    async function loadStatusJson() {
-      try {
-        const response = await fetch(STATUS_JSON_PFAD + "?v=" + Date.now(), { cache: "no-store" });
+    async function loadKontoJson() {
+      const url = JSON_PFAD + "?v=" + Date.now();
 
-        if (!response.ok) {
-          throw new Error("Status JSON konnte nicht geladen werden: " + STATUS_JSON_PFAD);
-        }
+      dbg("Lade JSON", url);
 
-        const data = await response.json();
-        dbg("status.json geladen", data);
-        return data;
-      } catch (error) {
-        dbg("Status JSON Fehler", error);
-        return null;
-      }
-    }
+      const response = await fetch(url, { cache: "no-store" });
 
-    function isSystemOpen(statusData) {
-      if (!statusData) {
-        return true;
+      if (!response.ok) {
+        throw new Error("JSON konnte nicht geladen werden: " + JSON_PFAD);
       }
 
-      if (typeof statusData.offen === "boolean") {
-        return statusData.offen;
-      }
-
-      if (typeof statusData.systemOffen === "boolean") {
-        return statusData.systemOffen;
-      }
-
-      if (typeof statusData.cc_offen === "boolean") {
-        return statusData.cc_offen;
-      }
-
-      return true;
+      const data = await response.json();
+      dbg("JSON geladen", data);
+      return data;
     }
 
     /*
-    ============================================================================
-    [E] DATEN LADEN / TOKEN PRUEFEN
-    ============================================================================
-    */
-
-    async function loadTokenData() {
-      const token = getToken();
-
-      if (!token) {
-        dbg("Kein Token in der URL gefunden");
-        goTo(getInvalidUrlFromParamsOrData(null));
-        return null;
-      }
-
-      const jsonPath = getTokenJsonPath();
-
-      if (!jsonPath) {
-        dbg("Kein Token JSON Pfad gebaut");
-        goTo(getInvalidUrlFromParamsOrData(null));
-        return null;
-      }
-
-      try {
-        const response = await fetch(jsonPath + "?v=" + Date.now(), { cache: "no-store" });
-
-        if (!response.ok) {
-          dbg("Token JSON nicht gefunden", jsonPath);
-          goTo(getInvalidUrlFromParamsOrData(null));
-          return null;
-        }
-
-        const data = await response.json();
-        dbg("Token JSON geladen", data);
-        return data;
-      } catch (error) {
-        dbg("Token JSON Fehler", error);
-        goTo(getInvalidUrlFromParamsOrData(null));
-        return null;
-      }
-    }
-
-    function checkTokenValidity(data) {
-      if (!data) {
-        goTo(getInvalidUrlFromParamsOrData(null));
-        return false;
-      }
-
-      if (!data.token) {
-        dbg("Token fehlt in JSON");
-        goTo(getInvalidUrlFromParamsOrData(data));
-        return false;
-      }
-
-      if (data.token !== getToken()) {
-        dbg("Token aus URL und JSON stimmen nicht ueberein");
-        goTo(getInvalidUrlFromParamsOrData(data));
-        return false;
-      }
-
-      const ablaufUnix = Number(data.ablaufUnix || 0);
-      const nowUnix = getUnixNow();
-
-      if (!Number.isFinite(ablaufUnix) || ablaufUnix <= 0) {
-        dbg("ablaufUnix ungueltig", data.ablaufUnix);
-        goTo(getInvalidUrlFromParamsOrData(data));
-        return false;
-      }
-
-      if (nowUnix > ablaufUnix) {
-        dbg("Token abgelaufen", { nowUnix, ablaufUnix });
-        goTo(getInvalidUrlFromParamsOrData(data));
-        return false;
-      }
-
-      return true;
-    }
-
-    /*
-    ============================================================================
-    [F] STATS / BUCHUNGEN RENDERN
-    ============================================================================
+    ===============================================================================
+    [D] RENDER - DATEN ANZEIGEN
+    ===============================================================================
     */
 
     function renderStats(data) {
-      const grid = document.getElementById('statsGrid');
-      grid.innerHTML = '';
+      const grid = document.getElementById("statsGrid");
+      grid.innerHTML = "";
 
       const items = [
-        ['Erhalten', formatNumber(data.erhalten)],
-        ['Gespendet', formatNumber(data.gespendet)],
-        ['Ausgegeben', formatNumber(data.ausgegeben)],
-        ['Nicht-Pool', formatNumber(data.nichtPool)],
-        ['Chaostopf Anteil', formatNumber(data.chaostopfAnteil)],
-        ['Pool eingezahlt', formatNumber(data.poolEingezahlt)],
-        ['Shop ausgegeben', formatNumber(data.shopAusgegeben)],
-        ['Bonus erhalten', formatNumber(data.bonusErhalten)],
-        ['Event-Gewinne', formatNumber(data.eventGewinne)],
-        ['Verlust', formatNumber(data.verlust)]
+        ["Erhalten", formatNumber(data.erhalten)],
+        ["Gespendet", formatNumber(data.gespendet)],
+        ["Ausgaben", formatNumber(data.ausgaben)],
+        ["Chaostopf Ausgaben", formatNumber(data.ausgabenChaostopf)],
+        ["Verlust", formatNumber(data.verlust)],
+        ["Belohnungen", formatNumber(data.belohnungZaehler)]
       ];
 
-      items.forEach(([label, value]) => grid.appendChild(createStatCard(label, value)));
-    }
-
-    function renderBookings(bookings) {
-      const list = document.getElementById('buchungenList');
-      list.innerHTML = '';
-
-      if (!Array.isArray(bookings) || bookings.length === 0) {
-        list.innerHTML = '<div class="empty">Noch keine Kontobewegungen vorhanden.</div>';
-        return;
-      }
-
-      bookings.forEach(item => {
-        const card = document.createElement('article');
-        const cls = amountClass(item.typ, item.betrag);
-        const sourceText = item.quelle ? `Quelle: ${item.quelle}` : '';
-        const standText = item.saldoNachher !== undefined ? `Stand danach: ${formatNumber(item.saldoNachher)}` : '';
-
-        card.className = 'booking';
-        card.innerHTML = `
-          <div class="booking-top">
-            <div>
-              <div class="booking-title">${item.titel || 'Buchung'}</div>
-              <div class="booking-date">${item.datum || '-'}</div>
-            </div>
-            <div class="amount ${cls}">${formatAmount(item.betrag)}</div>
-          </div>
-          <div class="booking-info">
-            ${sourceText ? `<span>${sourceText}</span>` : ''}
-            ${standText ? `<span>${standText}</span>` : ''}
-          </div>
-          ${item.text ? `<div class="booking-note">${item.text}</div>` : ''}
-        `;
-        list.appendChild(card);
+      items.forEach(([label, value]) => {
+        grid.appendChild(createStatCard(label, value));
       });
     }
 
-    function renderData(data) {
-      setText('userName', data.userName || '-');
-      setText('kontoNr', `Konto-Nr.: ${data.kontoNr || '-'}`);
-      setText('rang', `Rang: ${data.rang || '-'}`);
-      setText('standText', `Stand: ${data.standText || '-'}`);
-      setText('kontostand', formatNumber(data.kontostand || 0));
-      setText('kontostandText', `${formatNumber(data.kontostand || 0)} ChaosCoins`);
+    function renderChaostopf(data) {
+      const chaostopf = data.chaostopf || {};
 
-      renderStats(data);
-      renderBookings(data.buchungen || []);
+      const statusText = chaostopf.aktiv ? "Aktiv" : "Nicht aktiv";
+      const standText = chaostopf.standText || "-";
+      const eigenerBeitrag = formatNumber(chaostopf.eigenerBeitrag || 0);
+      const aktionText = chaostopf.aktionText || "-";
+
+      setText("chaostopfStatus", statusText);
+      setText("chaostopfStandText", standText);
+      setText("chaostopfEigenerBeitrag", eigenerBeitrag + " Coins");
+      setText("chaostopfAktionText", aktionText);
     }
 
-    function renderLoadError() {
-      setText('userName', 'Fehler beim Laden');
-      setText('kontostandText', 'Bitte Token / Pfad pruefen');
-      document.getElementById('statsGrid').innerHTML = '<div class="empty">Die Token-Datei konnte nicht geladen werden.</div>';
-      document.getElementById('buchungenList').innerHTML = '<div class="empty">Bitte Token, Dateipfad oder Status pruefen.</div>';
+    function renderSystem(data) {
+      const system = data.system || {};
+      setText("erstelltAm", system.erstelltAm || "-");
+    }
+
+    function renderData(data) {
+      setText("userName", data.userName || "-");
+      setText("kontoNr", "Konto-Nr.: " + (data.kontoNr || "-"));
+      setText("rangText", "Rang: " + (data.rangText || data.rang || "-"));
+      setText("standText", "Stand: " + (data.standText || "-"));
+      setText("kontostand", formatNumber(data.kontostand || 0));
+      setText("kontostandText", formatNumber(data.kontostand || 0) + " ChaosCoins");
+
+      renderStats(data);
+      renderChaostopf(data);
+      renderSystem(data);
+    }
+
+    function renderLoadError(error) {
+      dbg("Render Fehler", error);
+
+      setText("userName", "Fehler beim Laden");
+      setText("kontoNr", "Konto-Nr.: -");
+      setText("rangText", "Rang: -");
+      setText("standText", "Stand: Datei nicht gefunden");
+      setText("kontostand", "0");
+      setText("kontostandText", "Bitte JSON-Pfad pruefen");
+
+      document.getElementById("statsGrid").innerHTML =
+        '<div class="empty">Die kontoauszug_mobile.json konnte nicht geladen werden.</div>';
+
+      setText("chaostopfStatus", "-");
+      setText("chaostopfStandText", "-");
+      setText("chaostopfEigenerBeitrag", "-");
+      setText("chaostopfAktionText", "-");
+      setText("erstelltAm", "-");
     }
 
     /*
-    ============================================================================
-    [G] START
-    ============================================================================
+    ===============================================================================
+    [E] START - NICHT AENDERN
+    ===============================================================================
     */
 
     async function loadData() {
       try {
-        const statusData = await loadStatusJson();
-
-        if (!isSystemOpen(statusData)) {
-          dbg("System ist geschlossen");
-          goTo(getClosedUrlFromParamsOrData(statusData));
-          return;
-        }
-
-        const tokenData = await loadTokenData();
-        if (!tokenData) {
-          return;
-        }
-
-        if (!checkTokenValidity(tokenData)) {
-          return;
-        }
-
-        renderData(tokenData);
+        const data = await loadKontoJson();
+        renderData(data);
       } catch (error) {
-        dbg("Unerwarteter Gesamtfehler", error);
-        renderLoadError();
+        renderLoadError(error);
       }
     }
 
